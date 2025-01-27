@@ -1,6 +1,7 @@
 import { data } from "./utils/data"; // データのインポート
 import { renderBoxOutline, renderFilledBox } from "../BloomCore/RenderUtils";
-import { commands, syntax_color } from "./utils/text.js";
+import { commands, syntax_color } from "./utils/text";
+
 
 
 
@@ -243,7 +244,7 @@ ${loc_help_msg}
     if (subcommand === "help") {
         ChatLib.chat(help_msg);
     }
-}).setName("miloc");
+}).setName(commands.loc.name);
 
 
 const parse_key = (key) => {
