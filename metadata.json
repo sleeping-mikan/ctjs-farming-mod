@@ -6,7 +6,6 @@
     "entry": "index.js",
     "requires": [
         "PogData",
-        "BloomCore",
-        "BeaconBeam"
+        "BloomCore"
     ]
 }
