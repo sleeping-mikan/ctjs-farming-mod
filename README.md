@@ -5,7 +5,10 @@
 > [!note]
 > このmodの導入にはChatTriggersの導入が必要です。
 
-%AppData%\.minecraft\skyclient\config\ChatTriggersにMiFmを解凍し、配置してください
+(起動構成のパス)\config\ChatTriggersにMiFmを解凍し、配置してください
+
+> [!note]
+> このパスはゲーム内で/ct filesすることで開けることができます。
 
 ## Use it
 
