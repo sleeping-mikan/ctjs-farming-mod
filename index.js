@@ -2,6 +2,9 @@ import { data } from "./utils/data"; // データのインポート
 import { renderBoxOutline, renderFilledBox } from "../BloomCore/RenderUtils";
 import { commands, syntax_color, SendChat } from "./utils/text";
 import Mouse from "./utils/mouse";
+import miintro from "./utils/mi-core";
+
+console.log(miintro)
 
 
 const create_help_msg = ((item) => {
@@ -79,7 +82,7 @@ const keyConfigs = [settings.field_74351_w, settings.field_74368_y, settings.fie
 
 const attackKey = settings.field_74312_F;
 
-console.log(settings);
+// console.log(settings);
 
 register("renderWorld", () => {
     if (!isInGarden) return;
@@ -115,19 +118,19 @@ const get_player_pos = () => {
 const _append_marker = (x, y, z, id) => {
     const newPos = { x: x, y: y, z: z};
 
-    console.log(JSON.stringify(newPos));
+    // console.log(JSON.stringify(newPos));
 
     if (!data.pos) data.pos = {};
     if (!data.pos[id]) data.pos[id] = [];
     data.pos[id].push(newPos);
 
-    console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data));
 
     data.save();
 }
 
 const append_marker = (x, y, z, id) => {
-    console.log(`call append_marker(${x}, ${y}, ${z}, ${id})`);
+    // console.log(`call append_marker(${x}, ${y}, ${z}, ${id})`);
     if (id === undefined) {
         SendChat("&c引数が不足しています。/loc append <id> [X] [Y] [Z] の形式で入力してください。");
         return;
@@ -148,9 +151,9 @@ const _pop_marker = (...args) => {
     const pop_marker_by_pos = (x, y, z, _id) => {
         for (let id in data.pos) {
             element = data.pos[id];
-            console.log("run" + element);
+            // console.log("run" + element);
             if (_id !== undefined && id !== _id) continue;
-            console.log("run2" + element);
+            // console.log("run2" + element);
             for (let i = 0; i < element.length; i++) {
                 let marker = element[i];
                 if (marker.x === x && marker.y === y && marker.z === z) {
@@ -196,7 +199,7 @@ const _pop_marker = (...args) => {
 
 
 const pop_marker = (x, y, z, id) => {
-    console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data));
     if (x !== undefined && y !== undefined && z !== undefined && id !== undefined) {
         _pop_marker(x, y, z, id);
     }
@@ -209,14 +212,14 @@ const pop_marker = (x, y, z, id) => {
     else {
         SendChat("&c引数が不足しています。/loc pop [id] [X] [Y] [Z] の形式で入力してください。");
     }
-    console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data));
 }
 
 const list_markers = () => {
     if (!data.pos) data.pos = {};
     //中身をひとつづつ回す
     // console.dir(data.pos, {depth: null});
-    console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(data));
     for (let id in data.pos) {
         element = data.pos[id];
 
@@ -444,7 +447,7 @@ const _change_key_if_id = (id) => {
         update_settings();
 
 
-        console.log(`bindを変更しました: id = ${id}, key = ${key}`);
+        // console.log(`bindを変更しました: id = ${id}, key = ${key}`);
     }
 }
 
