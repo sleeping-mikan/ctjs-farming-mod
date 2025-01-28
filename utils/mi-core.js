@@ -49,4 +49,4 @@ Released under the MIT License 2025 Sleeping-Mikan
 --------------------------------------------------------------------------------------------------
 `
 
-export default milogo
+export default miintro
