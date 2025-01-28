@@ -1,3 +1,7 @@
+const meta = {
+    name : "mifm",
+}
+
 export const commands = {
     base: {
         name: "mifm",
@@ -76,3 +80,8 @@ commands.util.help = [
         description: "§a設定を初期化します。(w,a,s,d)に移動を割り当て、左クリックに破壊/攻撃を割り当てます。§r"
     }
 ];
+
+
+export const SendChat = (msg) => {
+    ChatLib.chat(`&6[&e${meta.name}&r&6]&r ${msg}`);
+}

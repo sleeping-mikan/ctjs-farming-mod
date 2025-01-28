@@ -1,7 +1,8 @@
 import { data } from "./utils/data"; // データのインポート
 import { renderBoxOutline, renderFilledBox } from "../BloomCore/RenderUtils";
-import { commands, syntax_color } from "./utils/text";
+import { commands, syntax_color, SendChat } from "./utils/text";
 import Mouse from "./utils/mouse";
+
 
 const create_help_msg = ((item) => {
     // commands.loc.help は配列なので、forEach を使って処理
@@ -53,10 +54,9 @@ register("worldload", () => {
 
         // エリアが取得できた場合
         if (area) {
-            // ChatLib.chat(`エリアの取得に成功しました: ${area}`);
             isInGarden = area === "Garden";
             if (isInGarden) {
-                ChatLib.chat("Gardenを検知しました。");
+                SendChat("Gardenを検知しました。");
             }
             return; // 処理終了
         }
@@ -129,11 +129,11 @@ const _append_marker = (x, y, z, id) => {
 const append_marker = (x, y, z, id) => {
     console.log(`call append_marker(${x}, ${y}, ${z}, ${id})`);
     if (id === undefined) {
-        ChatLib.chat("&c引数が不足しています。/loc append <id> [X] [Y] [Z] の形式で入力してください。");
+        SendChat("&c引数が不足しています。/loc append <id> [X] [Y] [Z] の形式で入力してください。");
         return;
     }
     if (x !== undefined && (y === undefined || z === undefined)) {
-        ChatLib.chat("&c座標が無効です。/loc append <id> [X] [Y] [Z] の形式で入力してください。");
+        SendChat("&c座標が無効です。/loc append <id> [X] [Y] [Z] の形式で入力してください。");
         return;
     }
     if (x === undefined) {
@@ -141,7 +141,7 @@ const append_marker = (x, y, z, id) => {
     }
     _append_marker(x, y, z, id);
 
-    ChatLib.chat(`現在の座標を保存しました: X = ${x}, Y = ${y}, Z = ${z}, id = ${id}`);
+    SendChat(`現在の座標を保存しました: X = ${x}, Y = ${y}, Z = ${z}, id = ${id}`);
 }
 
 const _pop_marker = (...args) => {
@@ -154,7 +154,7 @@ const _pop_marker = (...args) => {
             for (let i = 0; i < element.length; i++) {
                 let marker = element[i];
                 if (marker.x === x && marker.y === y && marker.z === z) {
-                    ChatLib.chat(`座標を削除しました: X = ${x}, Y = ${y}, Z = ${z}, id = ${id}`);
+                    SendChat(`座標を削除しました: X = ${x}, Y = ${y}, Z = ${z}, id = ${id}`);
                     element.splice(i, 1);
                     data.save();
                     --i;
@@ -207,7 +207,7 @@ const pop_marker = (x, y, z, id) => {
         _pop_marker(undefined);
     }
     else {
-        ChatLib.chat("&c引数が不足しています。/loc pop [id] [X] [Y] [Z] の形式で入力してください。");
+        SendChat("&c引数が不足しています。/loc pop [id] [X] [Y] [Z] の形式で入力してください。");
     }
     console.log(JSON.stringify(data));
 }
@@ -222,7 +222,7 @@ const list_markers = () => {
 
         for (let i = 0; i < element.length; i++) {
             let marker = element[i];
-            ChatLib.chat(`id: ${id}, X: ${marker.x}, Y: ${marker.y}, Z: ${marker.z}`);
+            SendChat(`id: ${id}, X: ${marker.x}, Y: ${marker.y}, Z: ${marker.z}`);
         }
     }; 
 }
@@ -232,7 +232,7 @@ const list_markers = () => {
 // 座標保存コマンド
 register("command", (subcommand ,arg1, arg2, arg3, arg4) => {
     if (subcommand === undefined) {
-        ChatLib.chat(
+        SendChat(
 `§csubcommandが選択されていません
 §f==============================
 ${loc_help_msg}
@@ -249,7 +249,7 @@ ${loc_help_msg}
         pop_marker(arg2, arg3, arg4, arg1);
     }
     if (subcommand === "help") {
-        ChatLib.chat(help_msg);
+        SendChat(help_msg);
     }
 }).setName(commands.loc.name);
 
@@ -272,11 +272,11 @@ const parse_key = (key) => {
 // if /swap then
 const _bind_change = (id, key) => {
     if (key === undefined) {
-        ChatLib.chat("&c引数が不足しています。/bind set <id> <w|a|s|d> の形式で入力してください。");
+        SendChat("&c引数が不足しています。/bind set <id> <w|a|s|d> の形式で入力してください。");
         return;
     }
     if (key !== "w" && key !== "a" && key !== "s" && key !== "d") {
-        ChatLib.chat("&c引数が無効です。/bind set <id> <w|a|s|d> の形式で入力してください。");
+        SendChat("&c引数が無効です。/bind set <id> <w|a|s|d> の形式で入力してください。");
         return;
     }
     // idのブロックを踏んだら発火するように記憶
@@ -288,7 +288,7 @@ const _bind_change = (id, key) => {
 
     data.save();
 
-    ChatLib.chat(`bindを保存しました: id = ${id}, key = ${key}`);
+    SendChat(`bindを保存しました: id = ${id}, key = ${key}`);
 
     // keyConfigs[0].func_151462_b(Keyboard.KEY_W)
     // keyConfigs[0].func_151462_b(Keyboard.KEY_S)
@@ -317,7 +317,7 @@ const _list_bind = () => {
                 key = "d";
                 break;
         }
-        ChatLib.chat(`id: ${id}, key: ${key}`);
+        SendChat(`id: ${id}, key: ${key}`);
     }
 }
 
@@ -329,7 +329,7 @@ const _config_reset = () => {
 
     update_settings();
 
-    ChatLib.chat("設定をリセットしました。");
+    SendChat("設定をリセットしました。");
 }
 
 
@@ -337,18 +337,18 @@ const _config_reset = () => {
 const _pop_bind = (id) => {
     if (!data.bind) data.bind = {};
     if (data.bind[id] === undefined) {
-        ChatLib.chat(`id: ${id} は登録されていません`);
+        SendChat(`id: ${id} は登録されていません`);
         return;
     }
     delete data.bind[id];
     data.save();
 
-    ChatLib.chat(`bindを削除しました: id = ${id}`);
+    SendChat(`bindを削除しました: id = ${id}`);
 }
 
 register("command", (subcommand, arg1, arg2) => {
     if (subcommand === undefined) {
-        ChatLib.chat(
+        SendChat(
 `§csubcommandが選択されていません
 ==============================
 ${bind_help_msg}
@@ -356,7 +356,7 @@ ${bind_help_msg}
         );
     }
     else if (subcommand === "help") {
-        ChatLib.chat(bind_help_msg);
+        SendChat(bind_help_msg);
     }
     else if (subcommand === "list") {
         _list_bind();
@@ -379,7 +379,7 @@ const _edfm = () => {
 
 register("command", (subcommand) => {
     if (subcommand === undefined) {
-        ChatLib.chat(
+        SendChat(
 `§csubcommandが選択されていません
 ==============================
 ${util_help_msg}
@@ -387,11 +387,12 @@ ${util_help_msg}
         );
     }
     else if (subcommand === "help") {
-        ChatLib.chat(util_help_msg);
+        SendChat(util_help_msg);
     }
     else if (subcommand === "stfm") {
         attackKey.func_151462_b(Keyboard.KEY_F);
         update_settings();
+        SendChat("Fキーに攻撃をセットしました。");
     }
     else if (subcommand === "edfm") {
         _edfm();
@@ -400,12 +401,13 @@ ${util_help_msg}
 
 // register("clicked", (x,y,button, isDown) => {
 //     if (isDown) {
-//         ChatLib.chat(`Button: ${button}`);
+//         SendChat(`Button: ${button}`);
 //     }
 // });
 
 const _help = () => {
-    ChatLib.chat(
+    SendChat(
+        "\n" +
         loc_help_msg +
         bind_help_msg +
         util_help_msg
@@ -465,7 +467,7 @@ register("renderOverlay", () => {
                 try{
                     World.playSound(sound_in_pos, 2, 1);
                 }catch(e){
-                    ChatLib.chat(`§cFailed to play sound: ${sound_in_pos}`);
+                    SendChat(`§cFailed to play sound: ${sound_in_pos}`);
                 }
             }
         }
