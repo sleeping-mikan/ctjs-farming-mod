@@ -5,10 +5,10 @@
 > [!note]
 > このmodの導入にはChatTriggersの導入が必要です。
 
-(起動構成のパス)\config\ChatTriggersにMiFmを解凍し、配置してください
+(起動構成のパス)\config\ChatTriggersにリポジトリを解凍し、配置してください
 
 > [!note]
-> このパスはゲーム内で/ct filesすることで開けることができます。
+> このパスはゲーム内で/ct filesを実行することで開けることができます。
 
 ## Use it
 
@@ -23,3 +23,8 @@
 |mifm-bind pop [id]|特定のidのキー割り当て情報を削除します。|
 |mifm-bind cnfrst|設定を初期化します。(w,a,s,d)に移動を割り当てます。|
 |mifm-bind list|現在のキー割り当て情報を表示します。|
+|mifm-util stfm|攻撃をFに設定します|
+|mifm-util edfm|攻撃をマウスに割り当て、移動をWASDに割り当てます。|
+
+|キー|実行結果|
+|R|攻撃をマウスに割り当て、移動をWASDに割り当てます。|

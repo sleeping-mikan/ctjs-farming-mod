@@ -11,6 +11,10 @@ export const commands = {
         name: "mifm-bind",
         help: []
     },
+    util: {
+        name: "mifm-util",
+        help: []
+    },
     help: {
         name: "mifm-help",
         help: []
@@ -50,7 +54,7 @@ commands.bind.help = [
     },
     {
         syntax: `/${commands.bind.name} cnfrst`,
-        description: "§a設定を初期化します。(w,a,s,d)に移動を割り当てます。§r"
+        description: "§aバインド設定を初期化します。(w,a,s,d)に移動を割り当てます。§r"
     },
     {
         syntax: `/${commands.bind.name} list`,
@@ -59,5 +63,16 @@ commands.bind.help = [
     {
         syntax: `/${commands.bind.name} pop <id>`,
         description: "§a特定のidのキー割り当て情報を削除します。§r"
+    }
+];
+
+commands.util.help = [
+    {
+        syntax: `/${commands.util.name} stfm`,
+        description: "§aFキーに破壊/攻撃を割り当てます。§r"
+    },
+    {
+        syntax: `/${commands.util.name} edfm`,
+        description: "§a設定を初期化します。(w,a,s,d)に移動を割り当て、左クリックに破壊/攻撃を割り当てます。§r"
     }
 ];

@@ -1,9 +1,35 @@
 import { data } from "./utils/data"; // データのインポート
 import { renderBoxOutline, renderFilledBox } from "../BloomCore/RenderUtils";
 import { commands, syntax_color } from "./utils/text";
+import Mouse from "./utils/mouse";
+
+const create_help_msg = ((item) => {
+    // commands.loc.help は配列なので、forEach を使って処理
+    let helpMessage = ""; // 結果を格納する文字列
+
+    // 配列に対して forEach を使う
+    commands[item].help.forEach((value) => {
+        // cmd, sub, args を取り出し、syntax を再構成
+        const cmd = value.syntax.split(" ")[0];
+        const sub = value.syntax.split(" ")[1] || ""; // サブコマンドを取り出す（存在すれば）
+        const args = value.syntax.split(" ").slice(2).join(" ") || ""; // 引数を取り出す（存在すれば）
+
+        // 新しい構造に基づいて新しい syntax を作成
+        const newSyntax = `${syntax_color.cmd}${cmd} ${syntax_color.sub}${sub} ${syntax_color.arg}${args}`;
 
 
+        // coloredSyntax に色をつけて表示する
+        helpMessage += `${newSyntax}\n${value.description}\n`;
+    });
 
+    return helpMessage; // 最終的な文字列を返す
+})
+
+const loc_help_msg = create_help_msg("loc");
+
+const bind_help_msg = create_help_msg("bind");
+
+const util_help_msg = create_help_msg("util");
 
 // Skyblockエリアの取得
 let isInGarden = false;
@@ -50,6 +76,8 @@ const settings = minecraft.field_71474_y; //game settings
 
 //key config [forward, back, left, right]
 const keyConfigs = [settings.field_74351_w, settings.field_74368_y, settings.field_74370_x, settings.field_74366_z];
+
+const attackKey = settings.field_74312_F;
 
 console.log(settings);
 
@@ -200,27 +228,6 @@ const list_markers = () => {
 }
 
 
-const loc_help_msg = (() => {
-    // commands.loc.help は配列なので、forEach を使って処理
-    let helpMessage = ""; // 結果を格納する文字列
-
-    // 配列に対して forEach を使う
-    commands.loc.help.forEach((value) => {
-        // cmd, sub, args を取り出し、syntax を再構成
-        const cmd = value.syntax.split(" ")[0];
-        const sub = value.syntax.split(" ")[1] || ""; // サブコマンドを取り出す（存在すれば）
-        const args = value.syntax.split(" ").slice(2).join(" ") || ""; // 引数を取り出す（存在すれば）
-
-        // 新しい構造に基づいて新しい syntax を作成
-        const newSyntax = `${syntax_color.cmd}${cmd} ${syntax_color.sub}${sub} ${syntax_color.arg}${args}`;
-
-
-        // coloredSyntax に色をつけて表示する
-        helpMessage += `${newSyntax}\n${value.description}\n`;
-    });
-
-    return helpMessage; // 最終的な文字列を返す
-})()
 
 // 座標保存コマンド
 register("command", (subcommand ,arg1, arg2, arg3, arg4) => {
@@ -325,25 +332,7 @@ const _config_reset = () => {
     ChatLib.chat("設定をリセットしました。");
 }
 
-const bind_help_msg = (() => {
-    let helpMessage = "";
 
-    commands.bind.help.forEach((value) => {
-        // cmd, sub, args を取り出し、syntax を再構成
-        const cmd = value.syntax.split(" ")[0];
-        const sub = value.syntax.split(" ")[1] || ""; // サブコマンドを取り出す（存在すれば）
-        const args = value.syntax.split(" ").slice(2).join(" ") || ""; // 引数を取り出す（存在すれば）
-
-        // 新しい構造に基づいて新しい syntax を作成
-        const newSyntax = `${syntax_color.cmd}${cmd} ${syntax_color.sub}${sub} ${syntax_color.arg}${args}`;
-
-
-        // coloredSyntax に色をつけて表示する
-        helpMessage += `${newSyntax}\n${value.description}\n`;
-    });
-
-    return helpMessage; // 最終的な文字列を返す
-})()
 
 const _pop_bind = (id) => {
     if (!data.bind) data.bind = {};
@@ -383,10 +372,43 @@ ${bind_help_msg}
     }
 }).setName(commands.bind.name);
 
+const _edfm = () => {
+    attackKey.func_151462_b(Mouse.left);
+    _config_reset();
+}
+
+register("command", (subcommand) => {
+    if (subcommand === undefined) {
+        ChatLib.chat(
+`§csubcommandが選択されていません
+==============================
+${util_help_msg}
+`
+        );
+    }
+    else if (subcommand === "help") {
+        ChatLib.chat(util_help_msg);
+    }
+    else if (subcommand === "stfm") {
+        attackKey.func_151462_b(Keyboard.KEY_F);
+        update_settings();
+    }
+    else if (subcommand === "edfm") {
+        _edfm();
+    }
+}).setName(commands.util.name);
+
+// register("clicked", (x,y,button, isDown) => {
+//     if (isDown) {
+//         ChatLib.chat(`Button: ${button}`);
+//     }
+// });
+
 const _help = () => {
     ChatLib.chat(
         loc_help_msg +
-        bind_help_msg
+        bind_help_msg +
+        util_help_msg
     )
 }
 
@@ -450,9 +472,8 @@ register("renderOverlay", () => {
     }
 });
 
-const resetKey = new KeyBind("reset movement config", Keyboard.KEY_R,"Mi");
+const resetKey = new KeyBind("reset keybind config", Keyboard.KEY_R,"Mi");
 
 resetKey.registerKeyPress(() => {
-    console.log("run")
-    _config_reset();
+    _edfm();
 });
