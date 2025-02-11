@@ -105,6 +105,9 @@ register("renderWorld", () => {
                 if (id in data.idcfg) {
                     if ("size" in data.idcfg[id]){
                         [dx, dy, dz] = [data.idcfg[id].size.dx, data.idcfg[id].size.dy, data.idcfg[id].size.dz];
+                        if (dx < 0) x += 1;
+                        if (dy < 0) y += 1;
+                        if (dz < 0) z += 1;
                     }
                 }
                 // 描画
@@ -488,9 +491,9 @@ const _change_key_if_id = (id) => {
 
 const isPlayerInBox = (boxPos, playerPos,size) => {
     // console.log(JSON.stringify(size));
-    if (size.dx < 0) {boxPos.x += size.dx; size.dx -= size.dx * 2};
-    if (size.dy < 0) {boxPos.y += size.dy; size.dy -= size.dy * 2};
-    if (size.dz < 0) {boxPos.z += size.dz; size.dz -= size.dz * 2};
+    if (size.dx < 0) {boxPos.x += size.dx + 1; size.dx -= size.dx * 2};
+    if (size.dy < 0) {boxPos.y += size.dy + 1; size.dy -= size.dy * 2};
+    if (size.dz < 0) {boxPos.z += size.dz + 1; size.dz -= size.dz * 2};
     return ((boxPos.x <= playerPos.x && boxPos.y <= playerPos.y && boxPos.z <= playerPos.z) && 
             (boxPos.x + size.dx > playerPos.x && boxPos.y + size.dy > playerPos.y && boxPos.z + size.dz > playerPos.z));
 }
