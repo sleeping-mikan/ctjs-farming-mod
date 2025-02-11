@@ -256,6 +256,10 @@ const list_markers = () => {
 
 const ChangeSize = ( id, dx, dy, dz) => {
     if (!isInGarden) return;
+    if (isNaN(dx) || isNaN(dy) || isNaN(dz)){
+        SendChat(`&c引数が無効です。/${commands.loc.name} size <id> <dx(float)> <dy(float)> <dz(float)> の形式で入力して下さい。`);
+        return;
+    }
     if (dz === undefined) {
         SendChat(`&c引数が不足しています。/${commands.loc.name} size <id> <dx> <dy> <dz> の形式で入力して下さい。`);
         return;
@@ -268,6 +272,25 @@ const ChangeSize = ( id, dx, dy, dz) => {
     data.idcfg[id].size = {dx: idx,dy: idy,dz: idz};
 
     data.save();
+}
+
+const MovePlace = (id, x, y, z) => {
+    if (!isInGarden) return;
+    if (isNaN(x) || isNaN(y) || isNaN(z)){
+        SendChat(`&c引数が無効です。/${commands.loc.name} move <id> <dx(int)> <dy(int)> <dz(int)> の形式で入力して下さい。`);
+        return;
+    }
+    if (z === undefined) {
+        SendChat(`&c引数が不足しています。/${commands.loc.name} move <id> <dx> <dy> <dz> の形式で入力して下さい。`);
+        return;
+    }
+    for (let i = 0; i < data.pos[id].length; i ++){
+        data.pos[id][i].x += Number(x);
+        data.pos[id][i].y += Number(y);
+        data.pos[id][i].z += Number(z);
+    }
+    data.save();
+    SendChat(`座標を移動しました: id = ${id}, X += ${x}, Y += ${y}, Z += ${z}`);
 }
 
 
@@ -293,8 +316,11 @@ ${loc_help_msg}
     if (subcommand === "help") {
         SendChat(help_msg);
     }
-    if (subcommand == "size") {
+    if (subcommand === "size") {
         ChangeSize(arg1, arg2, arg3, arg4);
+    }
+    if (subcommand === "move") {
+        MovePlace(arg1, arg2, arg3, arg4);
     }
 }).setName(commands.loc.name);
 
