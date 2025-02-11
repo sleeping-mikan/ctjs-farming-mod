@@ -1,26 +1,38 @@
-import { data, profile } from "./utils/data"; // データのインポート
+
 import { renderBoxFromCorners} from "../BloomCore/RenderUtils";
 import { commands, syntax_color, SendChat } from "./utils/text";
 import Mouse from "./utils/mouse";
-import miintro from "./utils/mi-core";
 import { deepCopyObject } from "../BloomCore/utils/Utils";
+import { profile, profileData, setProfileCallFunc } from "../MI";
 
-console.log(miintro)
+let data = profileData.data;
 
-if ("pos" in data) {
-    data.farming = deepCopyObject(data);
-    delete data.pos;
-    delete data.bind;
-    delete data.idcfg;
-    data.save();
+const initData = () => {
+    if ("pos" in data) {
+        data.farming = deepCopyObject(data);
+        delete data.pos;
+        delete data.bind;
+        delete data.idcfg;
+        data.save();
+    }
+    
+    if (!("farming" in data)) data.farming = {};
+    const farmingData = data.farming;
+    
+    if ( !("idcfg" in farmingData) ){
+        farmingData.idcfg = {}
+        data.save();
+    }
+    return farmingData
 }
 
-const farmingData = data.farming;
-
-if ( !("idcfg" in farmingData) ){
-    farmingData.idcfg = {}
-    farmingData.save();
-}
+let farmingData = initData();
+// プロフィール変更時に呼ばれる
+function profileCallFunc (profileData) {
+    data = profileData.data;
+    farmingData = initData();
+};
+setProfileCallFunc(profileCallFunc);
 
 const create_help_msg = ((item) => {
     // commands.loc.help は配列なので、forEach を使って処理
@@ -159,7 +171,7 @@ const _append_marker = (x, y, z, id) => {
 
     // console.log(JSON.stringify(farmingData));
 
-    farmingData.save();
+    data.save();
 }
 
 const append_marker = (x, y, z, id) => {
@@ -192,7 +204,7 @@ const _pop_marker = (...args) => {
                 if (marker.x === x && marker.y === y && marker.z === z) {
                     SendChat(`座標を削除しました: X = ${x}, Y = ${y}, Z = ${z}, id = ${id}`);
                     element.splice(i, 1);
-                    farmingData.save();
+                    data.save();
                     --i;
                 }
             }
@@ -217,7 +229,7 @@ const _pop_marker = (...args) => {
                 // del_id == idなら削除
                 if (id === del_id) {
                     delete farmingData.pos[id];
-                    farmingData.save();
+                    data.save();
                 } 
             }
         })();
@@ -280,7 +292,7 @@ const ChangeSize = ( id, dx, dy, dz) => {
     // データを保存する
     farmingData.idcfg[id].size = {dx: idx,dy: idy,dz: idz};
 
-    farmingData.save();
+    data.save();
 }
 
 const MovePlace = (id, x, y, z) => {
@@ -298,7 +310,7 @@ const MovePlace = (id, x, y, z) => {
         farmingData.pos[id][i].y += Number(y);
         farmingData.pos[id][i].z += Number(z);
     }
-    farmingData.save();
+    data.save();
     SendChat(`座標を移動しました: id = ${id}, X += ${x}, Y += ${y}, Z += ${z}`);
 }
 
@@ -366,7 +378,7 @@ const _bind_change = (id, key) => {
     //id を踏んだ時、keyの動作をDに設定
     farmingData.bind[id] = key;
 
-    farmingData.save();
+    data.save();
 
     SendChat(`bindを保存しました: id = ${id}, key = ${key}`);
 
@@ -421,7 +433,7 @@ const _pop_bind = (id) => {
         return;
     }
     delete farmingData.bind[id];
-    farmingData.save();
+    data.save();
 
     SendChat(`bindを削除しました: id = ${id}`);
 }
