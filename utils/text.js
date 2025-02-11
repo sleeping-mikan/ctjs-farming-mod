@@ -48,6 +48,10 @@ commands.loc.help = [
     {
         syntax: `/${commands.loc.name} size <id> <dx> <dy> <dz>`,
         description: "§aidに該当する座標のboxサイズをdx,dy,dzに変更します。§r"
+    },
+    {
+        syntax: `/${commands.loc.name} move <id> <dx> <dy> <dz>`,
+        description: "§aidに該当する座標boxをdx,dy,dz分移動します。§r"
     }
 ];
 
