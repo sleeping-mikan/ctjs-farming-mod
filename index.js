@@ -1,15 +1,25 @@
-import { data } from "./utils/data"; // データのインポート
+import { data, profile } from "./utils/data"; // データのインポート
 import { renderBoxFromCorners} from "../BloomCore/RenderUtils";
 import { commands, syntax_color, SendChat } from "./utils/text";
 import Mouse from "./utils/mouse";
 import miintro from "./utils/mi-core";
-import { deepCopyObject, toInt } from "../BloomCore/utils/Utils";
+import { deepCopyObject } from "../BloomCore/utils/Utils";
 
 console.log(miintro)
 
-if ( !("idcfg" in data) ){
-    data.idcfg = {}
+if ("pos" in data) {
+    data.farming = deepCopyObject(data);
+    delete data.pos;
+    delete data.bind;
+    delete data.idcfg;
     data.save();
+}
+
+const farmingData = data.farming;
+
+if ( !("idcfg" in farmingData) ){
+    farmingData.idcfg = {}
+    farmingData.save();
 }
 
 const create_help_msg = ((item) => {
@@ -91,27 +101,26 @@ const attackKey = settings.field_74312_F;
 
 register("renderWorld", () => {
     if (!isInGarden) return;
-    if (data.pos) {
-        for (let id in data.pos) {
-            for (let item in data.pos[id]) {
-                let x = data.pos[id][item].x;
-                let y = data.pos[id][item].y;
-                let z = data.pos[id][item].z;
+    if (farmingData.pos) {
+        for (let id in farmingData.pos) {
+            for (let item in farmingData.pos[id]) {
+                let x = farmingData.pos[id][item].x;
+                let y = farmingData.pos[id][item].y;
+                let z = farmingData.pos[id][item].z;
                 let p = id;
                 if (isNaN(id)){
                     p = 0
                     for (var i = 0; i < id.length; i ++)
                         p += id[i].charCodeAt(0);
                 }
-                console.log(p);
                 // 色設定
                 let r = p * 47 % 256, g = 255 - (p * 61 % 256), b = p * 125 % 256, alpha = 0.5;
                 
                 let [dx, dy, dz] = [1, 1, 1];
                 // サイズ
-                if (id in data.idcfg) {
-                    if ("size" in data.idcfg[id]){
-                        [dx, dy, dz] = [data.idcfg[id].size.dx, data.idcfg[id].size.dy, data.idcfg[id].size.dz];
+                if (id in farmingData.idcfg) {
+                    if ("size" in farmingData.idcfg[id]){
+                        [dx, dy, dz] = [farmingData.idcfg[id].size.dx, farmingData.idcfg[id].size.dy, farmingData.idcfg[id].size.dz];
                         if (dx < 0) x += 1;
                         if (dy < 0) y += 1;
                         if (dz < 0) z += 1;
@@ -144,13 +153,13 @@ const _append_marker = (x, y, z, id) => {
 
     // console.log(JSON.stringify(newPos));
 
-    if (!data.pos) data.pos = {};
-    if (!data.pos[id]) data.pos[id] = [];
-    data.pos[id].push(newPos);
+    if (!farmingData.pos) farmingData.pos = {};
+    if (!farmingData.pos[id]) farmingData.pos[id] = [];
+    farmingData.pos[id].push(newPos);
 
-    // console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(farmingData));
 
-    data.save();
+    farmingData.save();
 }
 
 const append_marker = (x, y, z, id) => {
@@ -173,8 +182,8 @@ const append_marker = (x, y, z, id) => {
 
 const _pop_marker = (...args) => {
     const pop_marker_by_pos = (x, y, z, _id) => {
-        for (let id in data.pos) {
-            element = data.pos[id];
+        for (let id in farmingData.pos) {
+            element = farmingData.pos[id];
             // console.log("run" + element);
             if (_id !== undefined && id !== _id) continue;
             // console.log("run2" + element);
@@ -183,7 +192,7 @@ const _pop_marker = (...args) => {
                 if (marker.x === x && marker.y === y && marker.z === z) {
                     SendChat(`座標を削除しました: X = ${x}, Y = ${y}, Z = ${z}, id = ${id}`);
                     element.splice(i, 1);
-                    data.save();
+                    farmingData.save();
                     --i;
                 }
             }
@@ -204,11 +213,11 @@ const _pop_marker = (...args) => {
     if (args.length === 1 && args[0] !== undefined) {
         (() => {
             const del_id = args[0];
-            for (let id in data.pos) {
+            for (let id in farmingData.pos) {
                 // del_id == idなら削除
                 if (id === del_id) {
-                    delete data.pos[id];
-                    data.save();
+                    delete farmingData.pos[id];
+                    farmingData.save();
                 } 
             }
         })();
@@ -223,7 +232,7 @@ const _pop_marker = (...args) => {
 
 
 const pop_marker = (x, y, z, id) => {
-    // console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(farmingData));
     if (x !== undefined && y !== undefined && z !== undefined && id !== undefined) {
         _pop_marker(x, y, z, id);
     }
@@ -236,16 +245,16 @@ const pop_marker = (x, y, z, id) => {
     else {
         SendChat("&c引数が不足しています。/loc pop [id] [X] [Y] [Z] の形式で入力してください。");
     }
-    // console.log(JSON.stringify(data));
+    // console.log(JSON.stringify(farmingData));
 }
 
 const list_markers = () => {
-    if (!data.pos) data.pos = {};
+    if (!farmingData.pos) farmingData.pos = {};
     //中身をひとつづつ回す
-    // console.dir(data.pos, {depth: null});
-    // console.log(JSON.stringify(data));
-    for (let id in data.pos) {
-        element = data.pos[id];
+    // console.dir(farmingData.pos, {depth: null});
+    // console.log(JSON.stringify(farmingData));
+    for (let id in farmingData.pos) {
+        element = farmingData.pos[id];
 
         for (let i = 0; i < element.length; i++) {
             let marker = element[i];
@@ -265,13 +274,13 @@ const ChangeSize = ( id, dx, dy, dz) => {
         return;
     }
     const [idx, idy, idz] = [Number(dx), Number(dy), Number(dz)];
-    if (!(id in data.idcfg)){
-        data.idcfg[id] = {}
+    if (!(id in farmingData.idcfg)){
+        farmingData.idcfg[id] = {}
     }
     // データを保存する
-    data.idcfg[id].size = {dx: idx,dy: idy,dz: idz};
+    farmingData.idcfg[id].size = {dx: idx,dy: idy,dz: idz};
 
-    data.save();
+    farmingData.save();
 }
 
 const MovePlace = (id, x, y, z) => {
@@ -284,12 +293,12 @@ const MovePlace = (id, x, y, z) => {
         SendChat(`&c引数が不足しています。/${commands.loc.name} move <id> <dx> <dy> <dz> の形式で入力して下さい。`);
         return;
     }
-    for (let i = 0; i < data.pos[id].length; i ++){
-        data.pos[id][i].x += Number(x);
-        data.pos[id][i].y += Number(y);
-        data.pos[id][i].z += Number(z);
+    for (let i = 0; i < farmingData.pos[id].length; i ++){
+        farmingData.pos[id][i].x += Number(x);
+        farmingData.pos[id][i].y += Number(y);
+        farmingData.pos[id][i].z += Number(z);
     }
-    data.save();
+    farmingData.save();
     SendChat(`座標を移動しました: id = ${id}, X += ${x}, Y += ${y}, Z += ${z}`);
 }
 
@@ -351,13 +360,13 @@ const _bind_change = (id, key) => {
         return;
     }
     // idのブロックを踏んだら発火するように記憶
-    if (!data.bind) data.bind = {};
+    if (!farmingData.bind) farmingData.bind = {};
     // 進む方向に変換
     key = parse_key(key);
     //id を踏んだ時、keyの動作をDに設定
-    data.bind[id] = key;
+    farmingData.bind[id] = key;
 
-    data.save();
+    farmingData.save();
 
     SendChat(`bindを保存しました: id = ${id}, key = ${key}`);
 
@@ -371,9 +380,9 @@ const _bind_change = (id, key) => {
 }
 
 const _list_bind = () => {
-    if (!data.bind) data.bind = {};
-    for (let id in data.bind) {
-        let key = data.bind[id];
+    if (!farmingData.bind) farmingData.bind = {};
+    for (let id in farmingData.bind) {
+        let key = farmingData.bind[id];
         switch (key) {
             case 0:
                 key = "w";
@@ -406,13 +415,13 @@ const _config_reset = () => {
 
 
 const _pop_bind = (id) => {
-    if (!data.bind) data.bind = {};
-    if (data.bind[id] === undefined) {
+    if (!farmingData.bind) farmingData.bind = {};
+    if (farmingData.bind[id] === undefined) {
         SendChat(`id: ${id} は登録されていません`);
         return;
     }
-    delete data.bind[id];
-    data.save();
+    delete farmingData.bind[id];
+    farmingData.save();
 
     SendChat(`bindを削除しました: id = ${id}`);
 }
@@ -497,9 +506,9 @@ register("command", () => {
 
 const _change_key_if_id = (id) => {
     if (!isInGarden) return;
-    if (!data.bind) data.bind = {};
-    //data.bind[id]が存在するか
-    if (data.bind[id] === undefined) {
+    if (!farmingData.bind) farmingData.bind = {};
+    //farmingData.bind[id]が存在するか
+    if (farmingData.bind[id] === undefined) {
         return false;
     }
     else{
@@ -508,7 +517,7 @@ const _change_key_if_id = (id) => {
         if (!keyConfigs.every(config => !config.func_151470_d())) {
             return;
         }
-        key = data.bind[id];
+        key = farmingData.bind[id];
         // 他のキーを無効に
         keyConfigs.forEach(config => config.func_151462_b(Keyboard.KEY_NONE));
 
@@ -533,14 +542,14 @@ const isPlayerInBox = (boxPos, playerPos,size) => {
 
 // オーバーレイ描画イベント
 register("renderOverlay", () => {
-    if (!isInGarden || !data.pos) return;
+    if (!isInGarden || !farmingData.pos) return;
     const playerPos = {x: (Player.getX()),y: (Player.getY()),z: (Player.getZ())};
-    for (let id in data.pos) {
-        element = data.pos[id];
+    for (let id in farmingData.pos) {
+        element = farmingData.pos[id];
         size = {dx: 1, dy: 1, dz: 1}
-        if (id in data.idcfg){
-            if ("size" in data.idcfg[id]){
-                size = data.idcfg[id].size;
+        if (id in farmingData.idcfg){
+            if ("size" in farmingData.idcfg[id]){
+                size = farmingData.idcfg[id].size;
             }
         }
         for (let i = 0; i < element.length; i++) {
