@@ -1,11 +1,16 @@
 import { data } from "./utils/data"; // データのインポート
-import { renderBoxOutline, renderFilledBox } from "../BloomCore/RenderUtils";
+import { renderBoxFromCorners} from "../BloomCore/RenderUtils";
 import { commands, syntax_color, SendChat } from "./utils/text";
 import Mouse from "./utils/mouse";
 import miintro from "./utils/mi-core";
+import { deepCopyObject, toInt } from "../BloomCore/utils/Utils";
 
 console.log(miintro)
 
+if ( !("idcfg" in data) ){
+    data.idcfg = {}
+    data.save();
+}
 
 const create_help_msg = ((item) => {
     // commands.loc.help は配列なので、forEach を使って処理
@@ -94,10 +99,19 @@ register("renderWorld", () => {
                 let z = data.pos[id][item].z;
                 // 色設定
                 let r = id * 47 % 256, g = 255 - (id * 61 % 256), b = id * 125 % 256, alpha = 0.5;
-
+                
+                let [dx, dy, dz] = [1, 1, 1];
+                // サイズ
+                if (id in data.idcfg) {
+                    if ("size" in data.idcfg[id]){
+                        [dx, dy, dz] = [data.idcfg[id].size.dx, data.idcfg[id].size.dy, data.idcfg[id].size.dz];
+                    }
+                }
                 // 描画
-                renderFilledBox(x + 0.5, y - 0.005, z + 0.5, 1.005, 1.01, r / 255, g / 255, b / 255, alpha, true);
-                renderBoxOutline(x + 0.5, y - 0.005, z + 0.5, 1.005, 1.01, r / 255, g / 255, b / 255, 1, 2, true);
+                renderBoxFromCorners(x, y, z, x + dx, y + dy, z + dz, r / 255, g / 255, b / 255, alpha, true, 2, true);
+                renderBoxFromCorners(x, y, z, x + dx, y + dy, z + dz, r / 255, g / 255, b / 255, alpha, true, 2, false);
+                const color = Renderer.color(r, g, b, alpha);
+                Tessellator.drawString(id, x + dx / 2, dy > 0 ? y + dy + 0.5 : y + 0.5, z + dz / 2, color, false, 0.03, false);
             }
         }
     }
@@ -230,6 +244,21 @@ const list_markers = () => {
     }; 
 }
 
+const ChangeSize = ( id, dx, dy, dz) => {
+    if (!isInGarden) return;
+    if (dz === undefined) {
+        SendChat(`&c引数が不足しています。/${commands.loc.name} size <id> <dx> <dy> <dz> の形式で入力して下さい。`);
+        return;
+    }
+    const [idx, idy, idz] = [Number(dx), Number(dy), Number(dz)];
+    if (!(id in data.idcfg)){
+        data.idcfg[id] = {}
+    }
+    // データを保存する
+    data.idcfg[id].size = {dx: idx,dy: idy,dz: idz};
+
+    data.save();
+}
 
 
 // 座標保存コマンド
@@ -253,6 +282,9 @@ ${loc_help_msg}
     }
     if (subcommand === "help") {
         SendChat(help_msg);
+    }
+    if (subcommand == "size") {
+        ChangeSize(arg1, arg2, arg3, arg4);
     }
 }).setName(commands.loc.name);
 
@@ -402,6 +434,8 @@ ${util_help_msg}
     }
 }).setName(commands.util.name);
 
+
+
 // register("clicked", (x,y,button, isDown) => {
 //     if (isDown) {
 //         SendChat(`Button: ${button}`);
@@ -430,7 +464,7 @@ const _change_key_if_id = (id) => {
     if (!data.bind) data.bind = {};
     //data.bind[id]が存在するか
     if (data.bind[id] === undefined) {
-        return;
+        return false;
     }
     else{
         // 押し終えたらキーを置き換える(そうでなければ、それまで待つ)
@@ -452,21 +486,34 @@ const _change_key_if_id = (id) => {
 }
 
 
-
+const isPlayerInBox = (boxPos, playerPos,size) => {
+    // console.log(JSON.stringify(size));
+    if (size.dx < 0) {boxPos.x += size.dx; size.dx -= size.dx * 2};
+    if (size.dy < 0) {boxPos.y += size.dy; size.dy -= size.dy * 2};
+    if (size.dz < 0) {boxPos.z += size.dz; size.dz -= size.dz * 2};
+    return ((boxPos.x <= playerPos.x && boxPos.y <= playerPos.y && boxPos.z <= playerPos.z) && 
+            (boxPos.x + size.dx > playerPos.x && boxPos.y + size.dy > playerPos.y && boxPos.z + size.dz > playerPos.z));
+}
 
 // オーバーレイ描画イベント
 register("renderOverlay", () => {
     if (!isInGarden || !data.pos) return;
-    const sound_in_pos = 'random.orb'; // 音の設定
-    const playerX = Math.floor(Player.getX());
-    const playerY = Math.floor(Player.getY());
-    const playerZ = Math.floor(Player.getZ());
+    const playerPos = {x: (Player.getX()),y: (Player.getY()),z: (Player.getZ())};
     for (let id in data.pos) {
         element = data.pos[id];
+        size = {dx: 1, dy: 1, dz: 1}
+        if (id in data.idcfg){
+            if ("size" in data.idcfg[id]){
+                size = data.idcfg[id].size;
+            }
+        }
         for (let i = 0; i < element.length; i++) {
             let pos = element[i];
-            if (pos.x === playerX && pos.y === playerY && pos.z === playerZ) {
-                _change_key_if_id(id);
+            if (isPlayerInBox(deepCopyObject(pos), playerPos, deepCopyObject(size))) {
+                let sound_in_pos = 'random.orb'; // 音の設定
+                if (_change_key_if_id(id) === false){
+                    sound_in_pos = 'note.pling'
+                }
                 try{
                     World.playSound(sound_in_pos, 2, 1);
                 }catch(e){

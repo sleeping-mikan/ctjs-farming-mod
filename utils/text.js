@@ -44,6 +44,10 @@ commands.loc.help = [
     {
         syntax: `/${commands.loc.name} list`,
         description: "§a登録座標を表示します。§r"
+    },
+    {
+        syntax: `/${commands.loc.name} size <id> <dx> <dy> <dz>`,
+        description: "§aidに該当する座標のboxサイズをdx,dy,dzに変更します。§r"
     }
 ];
 
