@@ -97,8 +97,15 @@ register("renderWorld", () => {
                 let x = data.pos[id][item].x;
                 let y = data.pos[id][item].y;
                 let z = data.pos[id][item].z;
+                let p = id;
+                if (isNaN(id)){
+                    p = 0
+                    for (var i = 0; i < id.length; i ++)
+                        p += id[i].charCodeAt(0);
+                }
+                console.log(p);
                 // 色設定
-                let r = id * 47 % 256, g = 255 - (id * 61 % 256), b = id * 125 % 256, alpha = 0.5;
+                let r = p * 47 % 256, g = 255 - (p * 61 % 256), b = p * 125 % 256, alpha = 0.5;
                 
                 let [dx, dy, dz] = [1, 1, 1];
                 // サイズ
