@@ -3,9 +3,9 @@
 ## How to Use
 
 > [!note]
-> このmodの導入にはChatTriggersの導入が必要です。
+> このmodの導入にはChatTriggersの導入とmiの導入が必要です。
 
-(起動構成のパス)\config\ChatTriggersにリポジトリを解凍し、配置してください
+(起動構成のパス)\config\ChatTriggers\modulesにリポジトリを解凍し、配置してください
 
 > [!note]
 > このパスはゲーム内で/ct filesを実行することで開けることができます。
