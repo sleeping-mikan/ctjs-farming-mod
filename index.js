@@ -169,7 +169,7 @@ register("renderWorld", () => {
                 // 描画
                 renderBoxFromCorners(x, y, z, x + dx, y + dy, z + dz, r / 255, g / 255, b / 255, alpha, true, 2, true);
                 renderBoxFromCorners(x, y, z, x + dx, y + dy, z + dz, r / 255, g / 255, b / 255, alpha, true, 2, false);
-                const color = Renderer.color(r, g, b, alpha);
+                let color = Renderer.color(r, g , b , alpha);
                 Tessellator.drawString(id, x + dx / 2, dy > 0 ? y + dy + 0.5 : y + 0.5, z + dz / 2, color, false, 0.03, false);
             }
         }
@@ -392,7 +392,7 @@ const _bind_change = (id, cmd) => {
         SendChat("&c引数が不足しています。/bind set <id> <w|a|s|d> の形式で入力してください。");
         return;
     }
-    if (cmd !== "w" && cmd !== "a" && cmd !== "s" && cmd !== "d" && !cmd[0].startsWith("/")) {
+    if (cmd[0] !== "w" && cmd[0] !== "a" && cmd[0] !== "s" && cmd[0] !== "d" && !cmd[0].startsWith("/")) {
         SendChat("&c引数が無効です。/bind set <id> <w|a|s|d> の形式で入力してください。");
         return;
     }
@@ -405,8 +405,8 @@ const _bind_change = (id, cmd) => {
         farmingData.bind[id] = cmd;
     }
     else{
-        const command = cmd;
-        farmingData.bind[id] = command.join(" ");
+        cmd = cmd.join(" ");
+        farmingData.bind[id] = cmd;
     }
 
     data.save();
