@@ -62,6 +62,10 @@ const bind_help_msg = create_help_msg("bind");
 
 const util_help_msg = create_help_msg("util");
 
+
+
+
+
 // Skyblockエリアの取得
 let isInGarden = false;
 function getSkyblockArea() {
@@ -109,6 +113,30 @@ const keyConfigs = [settings.field_74351_w, settings.field_74368_y, settings.fie
 
 const attackKey = settings.field_74312_F;
 
+const update_settings = () => {
+    settings.func_74303_b();
+    settings.func_74300_a(); // 設定を保存
+}
+
+const _config_reset = () => {
+    keyConfigs[0].func_151462_b(Keyboard.KEY_W);
+    keyConfigs[1].func_151462_b(Keyboard.KEY_S);
+    keyConfigs[2].func_151462_b(Keyboard.KEY_A);
+    keyConfigs[3].func_151462_b(Keyboard.KEY_D);
+
+    update_settings();
+
+    SendChat("設定をリセットしました。");
+}
+
+const _edfm = () => {
+    update_settings();
+    attackKey.func_151462_b(Mouse.left);
+    _config_reset();
+}
+
+_edfm();
+
 // console.log(settings);
 
 register("renderWorld", () => {
@@ -148,10 +176,7 @@ register("renderWorld", () => {
     }
 });
 
-const update_settings = () => {
-    settings.func_74303_b();
-    settings.func_74300_a(); // 設定を保存
-}
+
 
 const get_player_pos = () => {
     x = Math.floor(Player.getX());
@@ -362,25 +387,31 @@ const parse_key = (key) => {
 }
 
 // if /swap then
-const _bind_change = (id, key) => {
-    if (key === undefined) {
+const _bind_change = (id, cmd) => {
+    if (cmd === undefined || cmd.length === 0) {
         SendChat("&c引数が不足しています。/bind set <id> <w|a|s|d> の形式で入力してください。");
         return;
     }
-    if (key !== "w" && key !== "a" && key !== "s" && key !== "d") {
+    if (cmd !== "w" && cmd !== "a" && cmd !== "s" && cmd !== "d" && !cmd[0].startsWith("/")) {
         SendChat("&c引数が無効です。/bind set <id> <w|a|s|d> の形式で入力してください。");
         return;
     }
     // idのブロックを踏んだら発火するように記憶
     if (!farmingData.bind) farmingData.bind = {};
-    // 進む方向に変換
-    key = parse_key(key);
-    //id を踏んだ時、keyの動作をDに設定
-    farmingData.bind[id] = key;
+    if (!cmd[0].startsWith("/")){
+        // 進む方向に変換
+        cmd = parse_key(cmd[0]);
+        //id を踏んだ時、keyの動作をDに設定
+        farmingData.bind[id] = cmd;
+    }
+    else{
+        const command = cmd;
+        farmingData.bind[id] = command.join(" ");
+    }
 
     data.save();
 
-    SendChat(`bindを保存しました: id = ${id}, key = ${key}`);
+    SendChat(`bindを保存しました: id = ${id}, key = ${cmd}`);
 
     // keyConfigs[0].func_151462_b(Keyboard.KEY_W)
     // keyConfigs[0].func_151462_b(Keyboard.KEY_S)
@@ -413,16 +444,7 @@ const _list_bind = () => {
     }
 }
 
-const _config_reset = () => {
-    keyConfigs[0].func_151462_b(Keyboard.KEY_W);
-    keyConfigs[1].func_151462_b(Keyboard.KEY_S);
-    keyConfigs[2].func_151462_b(Keyboard.KEY_A);
-    keyConfigs[3].func_151462_b(Keyboard.KEY_D);
 
-    update_settings();
-
-    SendChat("設定をリセットしました。");
-}
 
 
 
@@ -438,7 +460,7 @@ const _pop_bind = (id) => {
     SendChat(`bindを削除しました: id = ${id}`);
 }
 
-register("command", (subcommand, arg1, arg2) => {
+register("command", (subcommand, arg1, ...arg2) => {
     if (subcommand === undefined) {
         SendChat(
 `§csubcommandが選択されていません
@@ -464,10 +486,7 @@ ${bind_help_msg}
     }
 }).setName(commands.bind.name);
 
-const _edfm = () => {
-    attackKey.func_151462_b(Mouse.left);
-    _config_reset();
-}
+
 
 register("command", (subcommand) => {
     if (subcommand === undefined) {
@@ -516,6 +535,11 @@ register("command", () => {
     _help();
 }).setName(commands.base.name);
 
+let runCommand = "";
+const myDKey = Client.getKeyBindFromKey(Keyboard.KEY_D, "myDKey");
+
+
+
 const _change_key_if_id = (id) => {
     if (!isInGarden) return;
     if (!farmingData.bind) farmingData.bind = {};
@@ -523,7 +547,7 @@ const _change_key_if_id = (id) => {
     if (farmingData.bind[id] === undefined) {
         return false;
     }
-    else{
+    else if (typeof farmingData.bind[id] === "number") {
         // 押し終えたらキーを置き換える(そうでなければ、それまで待つ)
         // (どれか一つがtrueならreturn)
         if (!keyConfigs.every(config => !config.func_151470_d())) {
@@ -540,6 +564,20 @@ const _change_key_if_id = (id) => {
 
         // console.log(`bindを変更しました: id = ${id}, key = ${key}`);
     }
+    else if (typeof farmingData.bind[id] === "string"
+            && farmingData.bind[id].startsWith("/")
+    ){
+        // キーを未使用に(未使用にするとキーバインドが分裂する)
+        // keyConfigs.forEach(config => config.func_151462_b(Keyboard.KEY_NONE));
+        // そのコマンドを登録
+        if (myDKey.isPressed()) {
+            ChatLib.command(farmingData.bind[id].slice(1));
+        }
+    }
+    else{
+        SendChat(`id: ${id} のbind ${farmingData.bind[id]}は無効です。`);
+    }
+    return true;
 }
 
 
