@@ -113,9 +113,12 @@ const keyConfigs = [settings.field_74351_w, settings.field_74368_y, settings.fie
 
 const attackKey = settings.field_74312_F;
 
+let myDKey = Client.getKeyBindFromKey(Keyboard.KEY_D, "myDKey");
 const update_settings = () => {
     settings.func_74303_b();
     settings.func_74300_a(); // 設定を保存
+    
+    myDKey = Client.getKeyBindFromKey(Keyboard.KEY_D, "myDKey");
 }
 
 const _config_reset = () => {
@@ -536,7 +539,6 @@ register("command", () => {
 }).setName(commands.base.name);
 
 let runCommand = "";
-const myDKey = Client.getKeyBindFromKey(Keyboard.KEY_D, "myDKey");
 
 
 
