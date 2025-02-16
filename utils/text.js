@@ -61,8 +61,8 @@ commands.loc.help = [
 // commands.bind.help を後から定義
 commands.bind.help = [
     {
-        syntax: `/${commands.bind.name} set <id> <key>`,
-        description: "§a特定のidを踏んだ時、そのkeyの動作をDに割り当てます。§r"
+        syntax: `/${commands.bind.name} set <id> <key|command>`,
+        description: "§a特定のidを踏んだ時、そのkey(a/w/s/d)の動作または/から始まるコマンドをDに割り当てます。ただし、コマンドとキーは独立してキーを持ちます。§r"
     },
     {
         syntax: `/${commands.bind.name} cnfrst`,
