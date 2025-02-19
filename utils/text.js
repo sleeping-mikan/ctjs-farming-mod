@@ -65,6 +65,10 @@ commands.bind.help = [
         description: "§a特定のidを踏んだ時、そのkey(a/w/s/d)の動作または/から始まるコマンドをDに割り当てます。ただし、コマンドとキーは独立してキーを持ちます。§r"
     },
     {
+        syntax: `/${commands.bind.name} set <id> toast <str>`,
+        description: "§a特定のidを踏んだ時、strをwindowsのtoastに表示します。(windowsのみ)§r"
+    },
+    {
         syntax: `/${commands.bind.name} cnfrst`,
         description: "§aバインド設定を初期化します。(w,a,s,d)に移動を割り当てます。§r"
     },
