@@ -7,6 +7,11 @@ import { profile, profileData, setProfileCallFunc } from "../MI";
 
 let data = profileData.data;
 
+const CoolTimes = {
+    PosCommands: 0,
+    BindToast: 0
+}
+
 const initData = () => {
     if ("pos" in data) {
         data.farming = deepCopyObject(data);
@@ -113,12 +118,12 @@ const keyConfigs = [settings.field_74351_w, settings.field_74368_y, settings.fie
 
 const attackKey = settings.field_74312_F;
 
-let myDKey = Client.getKeyBindFromKey(Keyboard.KEY_D, "myDKey");
+let myDKey = Client.getKeyBindFromKey(Keyboard.KEY_D);
 const update_settings = () => {
     settings.func_74303_b();
     settings.func_74300_a(); // 設定を保存
     
-    myDKey = Client.getKeyBindFromKey(Keyboard.KEY_D, "myDKey");
+    myDKey = Client.getKeyBindFromKey(Keyboard.KEY_D);
 }
 
 const _config_reset = () => {
@@ -395,22 +400,27 @@ const _bind_change = (id, cmd) => {
         SendChat("&c引数が不足しています。/bind set <id> <w|a|s|d> の形式で入力してください。");
         return;
     }
-    if (cmd[0] !== "w" && cmd[0] !== "a" && cmd[0] !== "s" && cmd[0] !== "d" && !cmd[0].startsWith("/")) {
+    if (cmd[0] !== "w" && cmd[0] !== "a" && cmd[0] !== "s" && cmd[0] !== "d" && !cmd[0].startsWith("/") && !cmd[0].startsWith("toast")) {
         SendChat("&c引数が無効です。/bind set <id> <w|a|s|d> の形式で入力してください。");
         return;
     }
     // idのブロックを踏んだら発火するように記憶
     if (!farmingData.bind) farmingData.bind = {};
-    if (!cmd[0].startsWith("/")){
+    if (cmd[0] === "w" || cmd[0] === "a" || cmd[0] === "s" || cmd[0] === "d"){
         // 進む方向に変換
         cmd = parse_key(cmd[0]);
         //id を踏んだ時、keyの動作をDに設定
+        farmingData.bind[id] = cmd;
+    }
+    else if (cmd[0].startsWith("toast")){
+        cmd = cmd.join(" ");
         farmingData.bind[id] = cmd;
     }
     else{
         cmd = cmd.join(" ");
         farmingData.bind[id] = cmd;
     }
+    console.log(cmd);
 
     data.save();
 
@@ -573,8 +583,37 @@ const _change_key_if_id = (id) => {
         // keyConfigs.forEach(config => config.func_151462_b(Keyboard.KEY_NONE));
         // そのコマンドを登録
         if (myDKey.isPressed()) {
+            if (CoolTimes.PosCommands > 0){
+                SendChat(`コマンドが使用可能になるまで ${CoolTimes.PosCommands} tick待ってください。`);
+                return true;
+            }
             ChatLib.command(farmingData.bind[id].slice(1));
+            CoolTimes.PosCommands = 20;
+            SendChat(`コマンドを実行しました: ${farmingData.bind[id].slice(1)}`);
         }
+    }
+    else if (typeof farmingData.bind[id] === "string"
+            && farmingData.bind[id].startsWith("toast")
+    ){
+        if (CoolTimes.BindToast > 0){
+            if (CoolTimes.BindToast % 10 === 0){
+                SendChat(`トーストが使用可能になるまで ${CoolTimes.BindToast} tick待ってください。`);
+            }
+            return "toast";
+        }
+        let command = 'powershell -Command "[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType=WindowsRuntime] | Out-Null;'
+        + '$Template = [Windows.UI.Notifications.ToastTemplateType]::ToastText01;'
+        + '$ToastXML = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($Template);'
+        + '$ToastTextElements = $ToastXML.GetElementsByTagName(\'text\');'
+        + '$ToastTextElements.Item(0).AppendChild($ToastXML.CreateTextNode(\''+ farmingData.bind[id].slice(5) +'\')) | Out-Null;'
+        + '$Toast = [Windows.UI.Notifications.ToastNotification]::new($ToastXML);'
+        + '$Toast.ExpirationTime = [DateTimeOffset]::Now.AddSeconds(3);' // 通知を1秒表示
+        + '$Notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier(\''+ 'Mifm' +'\');'
+        + '$Notifier.Show($Toast)"';
+
+        Java.type("java.lang.Runtime").getRuntime().exec(command);
+        CoolTimes.BindToast = 140;
+        return "toast";
     }
     else{
         SendChat(`id: ${id} のbind ${farmingData.bind[id]}は無効です。`);
@@ -593,7 +632,7 @@ const isPlayerInBox = (boxPos, playerPos,size) => {
 }
 
 // オーバーレイ描画イベント
-register("renderOverlay", () => {
+register("tick", () => {
     if (!isInGarden || !farmingData.pos) return;
     const playerPos = {x: (Player.getX()),y: (Player.getY()),z: (Player.getZ())};
     for (let id in farmingData.pos) {
@@ -608,11 +647,17 @@ register("renderOverlay", () => {
             let pos = element[i];
             if (isPlayerInBox(deepCopyObject(pos), playerPos, deepCopyObject(size))) {
                 let sound_in_pos = 'random.orb'; // 音の設定
-                if (_change_key_if_id(id) === false){
+                let result = _change_key_if_id(id);
+                if (result === false){
                     sound_in_pos = 'note.pling'
                 }
+                else if (result === "toast"){
+                    sound_in_pos = null;
+                }
                 try{
-                    World.playSound(sound_in_pos, 2, 1);
+                    if (sound_in_pos !== null){
+                        World.playSound(sound_in_pos, 2, 1);
+                    }
                 }catch(e){
                     SendChat(`§cFailed to play sound: ${sound_in_pos}`);
                 }
@@ -625,4 +670,13 @@ const resetKey = new KeyBind("reset keybind config", Keyboard.KEY_R,"Mi");
 
 resetKey.registerKeyPress(() => {
     _edfm();
+});
+
+register("tick", () => {
+    // cooltimeの全ての値を-1
+    for (let key in CoolTimes){
+        if (CoolTimes[key] > 0){
+            CoolTimes[key]--;
+        }
+    }
 });
