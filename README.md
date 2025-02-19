@@ -21,6 +21,7 @@
 |mifm-loc list|登録座標を全て表示します|
 |mifm-loc size [id] [dx] [dy] [dz]|idに該当する座標のboxサイズをdx,dy,dzに変更します。|
 |mifm-bind set [id] [key/command]|特定のidを踏んだ時、そのkey[a/w/s/d]の動作または/から始まるコマンドをDに割り当てます。ただし、コマンドとキーは独立してキーを持ちます。|
+|mifm-bind set [id] toast [str]|特定のidを踏んだ時、strをwindowsのtoastに表示します。(windowsのみ)|
 |mifm-bind pop [id]|特定のidのキー割り当て情報を削除します。|
 |mifm-bind cnfrst|設定を初期化します。(w,a,s,d)に移動を割り当てます。|
 |mifm-bind list|現在のキー割り当て情報を表示します。|
