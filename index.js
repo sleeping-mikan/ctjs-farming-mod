@@ -101,6 +101,7 @@ register("worldload", () => {
         }
 
         // エリアが取得できなかった場合
+        isInGarden = false;
         retryCount++;
         if (retryCount <= maxRetries) {
             setTimeout(reworldload, retryDelay); // 再試行
