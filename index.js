@@ -5,6 +5,10 @@ import Mouse from "./utils/mouse";
 import { deepCopyObject } from "../BloomCore/utils/Utils";
 import { profile, profileData, setProfileCallFunc } from "../MI";
 
+const ClientCommandHandler = Java.type("net.minecraftforge.client.ClientCommandHandler");
+const Minecraft = Java.type("net.minecraft.client.Minecraft");
+const mc = Minecraft.func_71410_x();
+
 let data = profileData.data;
 
 const CoolTimes = {
@@ -588,7 +592,11 @@ const _change_key_if_id = (id) => {
                 SendChat(`コマンドが使用可能になるまで ${CoolTimes.PosCommands} tick待ってください。`);
                 return true;
             }
-            ChatLib.command(farmingData.bind[id].slice(1));
+            // コマンドを実行(戻り値はコマンドが実行されたかどうかっぽい)
+            if (!ClientCommandHandler.instance.func_71556_a(mc.field_71439_g, `/${farmingData.bind[id].slice(1)}`)){
+                // コマンドを実行
+                ChatLib.command(farmingData.bind[id].slice(1));
+            }
             CoolTimes.PosCommands = 20;
             SendChat(`コマンドを実行しました: ${farmingData.bind[id].slice(1)}`);
         }
