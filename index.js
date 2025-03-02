@@ -587,19 +587,20 @@ const _change_key_if_id = (id) => {
         // キーを未使用に(未使用にするとキーバインドが分裂する)
         // keyConfigs.forEach(config => config.func_151462_b(Keyboard.KEY_NONE));
         // そのコマンドを登録
-        if (myDKey.isPressed()) {
-            if (CoolTimes.PosCommands > 0){
-                SendChat(`コマンドが使用可能になるまで ${CoolTimes.PosCommands} tick待ってください。`);
-                return true;
-            }
-            // コマンドを実行(戻り値はコマンドが実行されたかどうかっぽい)
-            if (!ClientCommandHandler.instance.func_71556_a(mc.field_71439_g, `/${farmingData.bind[id].slice(1)}`)){
-                // コマンドを実行
-                ChatLib.command(farmingData.bind[id].slice(1));
-            }
-            CoolTimes.PosCommands = 20;
-            SendChat(`コマンドを実行しました: ${farmingData.bind[id].slice(1)}`);
+        if (!keyConfigs.every(config => !config.func_151470_d())) {
+            return;
         }
+        if (CoolTimes.PosCommands > 0){
+            SendChat(`コマンドが使用可能になるまで ${CoolTimes.PosCommands} tick待ってください。`);
+            return true;
+        }
+        // コマンドを実行(戻り値はコマンドが実行されたかどうかっぽい)
+        if (!ClientCommandHandler.instance.func_71556_a(mc.field_71439_g, `/${farmingData.bind[id].slice(1)}`)){
+            // コマンドを実行
+            ChatLib.command(farmingData.bind[id].slice(1));
+        }
+        CoolTimes.PosCommands = 20;
+        SendChat(`コマンドを実行しました: ${farmingData.bind[id].slice(1)}`);
     }
     else if (typeof farmingData.bind[id] === "string"
             && farmingData.bind[id].startsWith("toast")
