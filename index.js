@@ -4,6 +4,8 @@ import { commands, syntax_color, SendChat } from "./utils/text";
 import Mouse from "./utils/mouse";
 import { deepCopyObject } from "../BloomCore/utils/Utils";
 import { profile, profileData, setProfileCallFunc } from "../MI";
+import './src/gui/index'
+import './src/jacobTracker/index'
 
 const ClientCommandHandler = Java.type("net.minecraftforge.client.ClientCommandHandler");
 const Minecraft = Java.type("net.minecraft.client.Minecraft");
@@ -425,7 +427,6 @@ const _bind_change = (id, cmd) => {
         cmd = cmd.join(" ");
         farmingData.bind[id] = cmd;
     }
-    console.log(cmd);
 
     data.save();
 
@@ -545,9 +546,6 @@ const _help = () => {
     )
 }
 
-register("command", () => {
-    _help();
-}).setName(commands.help.name);
 
 register("command", () => {
     _help();
