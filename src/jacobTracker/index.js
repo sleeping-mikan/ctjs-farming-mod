@@ -54,8 +54,6 @@ register("step", () => {
                 console.error("Fetch error:", error);
                 return;
             }
-            console.log("timestamp : " + new Date().getTime());
-            console.log(JSON.stringify(data));
             isSearched = true;
             isFirstDrew = true;
             // 描写にセット

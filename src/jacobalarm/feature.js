@@ -36,7 +36,6 @@ const CropToString = (crop) => {
 }
 
 export const alarm = (nowTimestamp, nextContestsTime, Crops) => {
-    console.log(`alarm: ${nowTimestamp}, ${nextContestsTime}`);
     // アラート系設定がオフなら
     if (!config.MiFm.JacobContestAlert.enabled && !config.MiFm.JacobContestMelonAlert.enabled) {
         return;

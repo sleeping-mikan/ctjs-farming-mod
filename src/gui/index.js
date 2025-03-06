@@ -23,7 +23,6 @@ const configGen = () => {
     if (config.MiFm.JacobContestMelonAlert.enabled === undefined) config.MiFm.JacobContestMelonAlert.enabled = false;
 
     config.save();
-    console.log(JSON.stringify(config));
 }
 
 configGen();
