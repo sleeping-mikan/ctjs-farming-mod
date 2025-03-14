@@ -21,6 +21,7 @@ function get(path, callback) {
                 var url = new URL(END_POINT + path);
                 var connection = url.openConnection();
                 connection.setRequestMethod("GET");
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0");
 
                 var reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 var response = new StringBuilder();
