@@ -13,6 +13,7 @@ const configGen = () => {
     if (config.MiFm.JacobContestTracker.scale === undefined) config.MiFm.JacobContestTracker.scale = 1.0;
     if (config.MiFm.JacobContestTracker.offsetX === undefined) {config.MiFm.JacobContestTracker.offsetX = 0.0;}
     if (config.MiFm.JacobContestTracker.offsetY === undefined) config.MiFm.JacobContestTracker.offsetY = 0.0;
+    if (config.MiFm.JacobContestTracker.enableOnAroundGarden === undefined) config.MiFm.JacobContestTracker.enableOnAroundGarden = true;
 
     // Jacob Contest Alert
     if (config.MiFm.JacobContestAlert === undefined) config.MiFm.JacobContestAlert = {};
@@ -32,6 +33,12 @@ gui.appendCategory("MiFm");
 gui.appendItemWithSwitch("MiFm", "Jacob Contest Tracker", config.MiFm.JacobContestTracker.enabled, (isOn) => {
     // ボタンを押したことの確認
     config.MiFm.JacobContestTracker.enabled = isOn;
+    config.save();
+});
+
+gui.appendItemWithSwitch("MiFm", "Jacob Contest Tracker - Enable on around Garden", config.MiFm.JacobContestTracker.enableOnAroundGarden, (isOn) => {
+    // ボタンを押したことの確認
+    config.MiFm.JacobContestTracker.enableOnAroundGarden = isOn;
     config.save();
 });
 

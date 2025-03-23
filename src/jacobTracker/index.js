@@ -3,6 +3,8 @@ import { hud } from "../../../MI/gui";
 import { getMikanGraphics } from "../../../MiGui/ObjectMove";
 import { gui } from "../../../MI/gui";
 import { alarm } from "../jacobalarm/feature";
+import { getArea } from "../../utils/area/area.js";
+import { SendChat } from "../../utils/text.js";
 
 const END_POINT = "https://jacobs.strassburger.dev/api/jacobcontests"
 
@@ -86,6 +88,10 @@ const baseHudSize = [100, 60];
 const jacobTrackerHud = getMikanGraphics(config.MiFm.JacobContestTracker.offsetX, config.MiFm.JacobContestTracker.offsetY, baseHudSize[0], baseHudSize[1], 
 () => {
     if (!config.MiFm.JacobContestTracker.enabled) {
+        return;
+    }
+    // Garden以外は表示しない
+    if (!config.MiFm.JacobContestTracker.enableOnAroundGarden && getArea() !== "Garden") {
         return;
     }
     let ContestsCount = 0;
